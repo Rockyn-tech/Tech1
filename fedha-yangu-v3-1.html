@@ -1,0 +1,862 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Fedha Yangu</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:opsz,wght@6..72,500&display=swap">
+<style>
+/* Layout: one column, phone first. Colors are tokens so both themes stay consistent. */
+:root{--bg:#f4f3ec;--surface:#fdfcf7;--ink:#1b2720;--muted:#63706a;--line:#d9ddd2;--accent:#1d6a55;--pos:#2b7a4b;--neg:#b1392c;--gold:#b98421;--tint:#e7eee7;color-scheme:light}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#101815;--surface:#17221e;--ink:#e6eee8;--muted:#98a79e;--line:#2b3a33;--accent:#5cbc9c;--pos:#6fcb8c;--neg:#ec7b68;--gold:#dcb062;--tint:#1d2c26;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#101815;--gold:#dcb062;--surface:#17221e;--ink:#e6eee8;--muted:#98a79e;--line:#2b3a33;--accent:#5cbc9c;--pos:#6fcb8c;--neg:#ec7b68;--tint:#1d2c26;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "IBM Plex Sans",system-ui,sans-serif;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:720px;margin:0 auto;position:relative}
+h1{font:500 30px/1.1 Newsreader,Georgia,serif;margin:0 0 4px;text-wrap:balance}
+h2{font:500 20px/1.2 Newsreader,Georgia,serif;margin:0 0 12px}
+.sub{color:var(--muted);margin:0;font-size:14px}
+.top{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:flex-end;margin-bottom:16px}
+.month{display:flex;flex-direction:column;font-size:12px;color:var(--muted);gap:4px}
+.acct{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;margin-bottom:10px}
+nav{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:18px;overflow-x:auto}
+nav button{background:none;border:0;padding:10px 12px;color:var(--muted);font:inherit;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;min-width:0}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}
+.tile small{display:block;color:var(--muted);font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.num{font-family:"IBM Plex Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;font-size:15px;overflow-wrap:anywhere}
+.pos{color:var(--pos)} .neg{color:var(--neg)} .muted{color:var(--muted)}
+form{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+form label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);flex:1 1 150px;min-width:0}
+input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;min-width:0}
+button.primary{font:inherit;font-weight:600;background:var(--accent);color:var(--bg);border:0;border-radius:8px;padding:10px 16px;cursor:pointer}
+button.ghost{font:inherit;background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:13px}
+.auth{max-width:420px;margin:32px auto 0}
+.auth form{flex-direction:column;align-items:stretch}
+.auth form label{flex:none}
+.entry{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.entry:first-child{border-top:0}
+.entry .meta{min-width:0}
+.entry .meta b{font-weight:500}
+.entry .meta span{display:block;color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.right{display:flex;align-items:center;gap:10px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+.bar-row{display:grid;grid-template-columns:minmax(90px,140px) 1fr auto;gap:10px;align-items:center;margin:8px 0;font-size:14px}
+.bar-row small{display:block;font-size:12px;margin-top:2px}
+.track{background:var(--tint);border-radius:4px;height:10px;overflow:hidden}
+.fill{height:100%;background:var(--accent);border-radius:4px}
+.fill.neg{background:var(--neg)}
+.fill.warn{background:var(--gold)}
+.warn-t{color:var(--gold)}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-bottom:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:middle}
+svg{width:100%;height:auto;display:block}
+.bar-in{fill:var(--pos)} .bar-out{fill:var(--neg)} .axis{fill:var(--muted);font-size:11px} .grid{stroke:var(--line)}
+.hold{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+.hold:first-of-type{border-top:0;margin-top:0;padding-top:0}
+.hold-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.badge{font-size:12px;padding:2px 10px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:10px 0;font-size:13px;color:var(--muted)}
+.stats b{display:block;color:var(--ink);font:500 14px "IBM Plex Mono",monospace;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.logrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.logrow input{max-width:200px}
+.note{font-size:12px;color:var(--muted);margin:8px 0 0}
+.empty{color:var(--muted);font-size:14px;padding:8px 0;margin:0}
+#f-budget{margin-top:12px}
+.avatar{width:72px;height:72px;border-radius:50%;background:var(--tint) center/cover no-repeat;color:var(--accent);display:grid;place-items:center;font:500 28px/1 Newsreader,Georgia,serif;flex-shrink:0;border:1px solid var(--line);overflow:hidden}
+.avatar.sm{width:36px;height:36px;font-size:15px}
+.who-wrap{display:flex;align-items:center;gap:8px;min-width:0}
+.profile{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.pmeta{flex:1 1 200px;min-width:0;display:flex;flex-direction:column;gap:4px}
+.pmeta b{font-weight:500;font-size:17px;overflow-wrap:anywhere}
+.profile .logrow{margin-top:6px}
+.ghost.btn-label{display:inline-block;cursor:pointer;color:var(--ink)}
+.sr{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;min-width:0;resize:vertical}
+.right select{width:auto;max-width:100%}
+.check{flex-direction:row!important;align-items:center;gap:8px;color:var(--ink);font-size:14px}
+.check input{width:auto}
+.dash-btn{font-weight:600;color:var(--ink)}
+.dash{position:absolute;top:58px;left:0;z-index:20;width:min(380px,calc(100% - 0px));background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;box-shadow:0 12px 30px rgba(0,0,0,.18)}
+.dash-tile{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;font:inherit;color:var(--ink);cursor:pointer;min-width:0}
+.dash-tile b{font-weight:600}
+.dash-tile span{font-size:12px;color:var(--muted)}
+.dash-tile.danger b{color:var(--neg)}
+</style>
+
+<section id="auth" class="auth">
+  <div class="card">
+    <h1 id="auth-title">Sign in</h1>
+    <p class="sub">Each account keeps its own records, saved in this browser.</p>
+    <form id="f-auth" style="margin-top:14px">
+      <label>Username<input id="un" autocomplete="username" maxlength="20" required></label>
+      <label>Password<input id="pw" type="password" autocomplete="current-password" required></label>
+      <label id="pw2-wrap" hidden>Confirm password<input id="pw2" type="password" autocomplete="new-password"></label>
+      <label class="check"><input id="remember" type="checkbox"> Remember me on this device, so I don't need my password next time</label>
+      <button class="primary" id="auth-submit" type="submit">Sign in</button>
+    </form>
+    <p class="note" id="auth-msg"></p>
+    <button class="ghost" id="auth-toggle" type="button" style="margin-top:12px">New here? Create an account</button>
+  </div>
+</section>
+
+<div id="app" hidden>
+<div class="wrap">
+  <div class="acct">
+    <span class="who-wrap">
+      <button class="ghost dash-btn" id="dash-btn" type="button" aria-expanded="false" aria-controls="dash">Dashboard</button>
+      <span class="muted" id="who"></span>
+    </span>
+    <span class="avatar sm" id="av-small"></span>
+  </div>
+  <div class="dash" id="dash" role="menu" hidden>
+    <button class="dash-tile" type="button" data-go="stocks" role="menuitem"><b>Stocks</b><span>DSE holdings and price charts</span></button>
+    <button class="dash-tile" type="button" data-go="graphs" role="menuitem"><b>Graphs</b><span>Income and spending by month</span></button>
+    <button class="dash-tile" type="button" data-go="budget" role="menuitem"><b>My budget</b><span>Monthly limits and what is left</span></button>
+    <button class="dash-tile danger" id="logout" type="button" role="menuitem"><b>Log out</b><span>Sign out of this account</span></button>
+  </div>
+
+  <header class="top">
+    <div>
+      <h1>Fedha Yangu</h1>
+      <p class="sub">Income, spending and DSE shares, in TZS.</p>
+      <button class="ghost" id="clear-ex" hidden style="margin-top:8px">Remove example data</button>
+    </div>
+    <label class="month">Month<input type="month" id="month"></label>
+  </header>
+
+  <nav role="tablist">
+    <button data-tab="overview" aria-selected="true">Overview</button>
+    <button data-tab="add" aria-selected="false">Add</button>
+    <button data-tab="income" aria-selected="false">Income</button>
+    <button data-tab="spend" aria-selected="false">Spending</button>
+    <button data-tab="stocks" aria-selected="false">Stocks</button>
+  </nav>
+
+  <section id="tab-overview">
+    <div class="card profile">
+      <div class="avatar" id="av-big"></div>
+      <div class="pmeta">
+        <b id="pname"></b>
+        <span class="note">Your profile picture appears at the top of the app. Large photos are cropped to a square automatically.</span>
+        <div class="logrow">
+          <label class="ghost btn-label" for="av-file">Choose picture</label>
+          <input id="av-file" class="sr" type="file" accept="image/*">
+          <button class="ghost" id="av-remove" type="button">Remove picture</button>
+        </div>
+        <p class="note" id="av-msg"></p>
+        <div class="logrow">
+          <button class="ghost" id="dl-backup" type="button">Download backup</button>
+          <button class="ghost" id="dl-csv" type="button">Download CSV</button>
+          <label class="ghost btn-label" for="bk-file">Restore backup</label>
+          <input id="bk-file" class="sr" type="file" accept=".json,application/json">
+        </div>
+        <p class="note" id="dl-msg"></p>
+        <p class="note">To use this like an app, choose Add to Home Screen (phone) or Install (desktop browser) from your browser menu. To share, use the Share menu on this page. Someone you invite gets their own empty account, not your records, so use the backup to move records between devices.</p>
+      </div>
+    </div>
+    <div class="tiles" id="sum"></div>
+    <div class="card" id="budget-card"></div>
+    <div class="card">
+      <h2 id="graphs">Income vs spending</h2>
+      <div class="legend"><span><i style="background:var(--pos)"></i>Income</span><span><i style="background:var(--neg)"></i>Spending</span></div>
+      <div id="chart"></div>
+    </div>
+    <div class="card"><h2>Spending by category</h2><div id="out-bars"></div></div>
+    <div class="card"><h2>Income by source</h2><div id="in-bars"></div></div>
+  </section>
+
+  <section id="tab-add" hidden>
+    <div class="card">
+      <h2>Add an entry</h2>
+      <form id="f-add">
+        <label>Type<select id="add-type"><option value="income">Income</option><option value="spend">Spending</option></select></label>
+        <label>Category<select id="add-cat"></select></label>
+        <label>Amount (TZS)<input id="add-amount" type="number" min="1" step="1" required></label>
+        <label>Date<input id="add-date" type="date" required></label>
+        <label>Note<input id="add-note" maxlength="80" placeholder="optional"></label>
+        <button class="primary" type="submit">Add entry</button>
+      </form>
+      <p class="note" id="add-msg"></p>
+    </div>
+    <div class="card">
+      <h2>Import from bank or M-Pesa</h2>
+      <p class="note" style="margin:0 0 8px">This page cannot connect to your bank account directly. Instead, paste bank or mobile money messages, or the lines of a statement file. The app reads the amount, the date and whether money came in or went out. Then choose a category for each line and add them.</p>
+      <form id="f-import">
+        <label style="flex:1 1 100%">Messages or statement lines<textarea id="imp-text" rows="5" placeholder="One message or statement line per row"></textarea></label>
+        <label style="flex:1 1 100%">Or load a statement file (.csv or .txt)<input id="imp-file" type="file" accept=".csv,.txt,text/csv,text/plain"></label>
+        <button class="primary" type="submit">Read entries</button>
+      </form>
+      <p class="note" id="imp-msg"></p>
+      <div id="imp-preview" style="margin-top:8px"></div>
+      <div class="logrow" id="imp-actions" hidden><button class="primary" id="imp-save" type="button">Add categorised entries</button><button class="ghost" id="imp-clear" type="button">Clear</button></div>
+    </div>
+    <div class="card">
+      <h2>Your categories</h2>
+      <p class="note" style="margin:0 0 8px">Add income sources or spending categories beyond the defaults. They appear in the Add form straight away.</p>
+      <form id="f-cat">
+        <label>Kind<select id="cat-kind"><option value="income">Income source</option><option value="spend">Spending category</option></select></label>
+        <label>Name<input id="cat-name" maxlength="30" placeholder="e.g. Rent income" required></label>
+        <button class="primary" type="submit">Add category</button>
+      </form>
+      <p class="note" id="cat-msg"></p>
+      <div id="cat-list" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <section id="tab-income" hidden>
+    <div class="card" style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+      <span class="muted">Income recorded for this month.</span>
+      <button class="primary" type="button" data-add="income">Add income</button>
+    </div>
+    <div class="tiles" id="inc-tiles"></div>
+    <div class="card" id="inc-list"></div>
+  </section>
+
+  <section id="tab-spend" hidden>
+    <div class="card">
+      <h2>Monthly budgets</h2>
+      <p class="note" style="margin:0">Limits apply to every month. Leave a field empty for no limit.</p>
+      <form id="f-budget"></form>
+      <p class="note" id="bud-msg"></p>
+    </div>
+    <div class="card" style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+      <span class="muted">Spending recorded for this month.</span>
+      <button class="primary" type="button" data-add="spend">Add spending</button>
+    </div>
+    <div class="tiles" id="sp-tiles"></div>
+    <div class="card" id="sp-list"></div>
+  </section>
+
+  <section id="tab-stocks" hidden>
+    <div class="card">
+      <h2>Add a DSE holding</h2>
+      <form id="f-hold">
+        <label>Ticker<input name="ticker" list="dse" required placeholder="e.g. CRDB" maxlength="8"></label>
+        <label>Shares<input name="shares" type="number" min="1" step="1" required></label>
+        <label>Buy price per share (TZS)<input name="buy" type="number" min="0.01" step="0.01" required></label>
+        <label>Buy date<input name="buyDate" type="date" required></label>
+        <label>Latest price (TZS, optional)<input name="current" type="number" min="0.01" step="0.01"></label>
+        <button class="primary" type="submit">Add holding</button>
+      </form>
+      <datalist id="dse"></datalist>
+      <p class="note" id="hold-msg"></p>
+      <p class="note">Prices are not fetched live. Copy the closing price from the <a href="https://dse.co.tz/" target="_blank" rel="noopener">DSE daily report</a> and log it on each holding. Each log adds a point to the chart.</p>
+    </div>
+    <div class="card" id="holdings"></div>
+  </section>
+</div>
+</div>
+
+<script>
+const BASE_INC={kilimo:'Investment · Kilimo',hisa:'Investment · Hisa',betting:'Investment · Betting',salary:'Salary',adam:'Adam'};
+const BASE_SPEND={home:'Home',mchumba:'Mchumba',baba:'Baba',mama:'Mama',vocha:'Vocha (airtime)',kukopesha:'Kukopesha (loans given)'};
+const DSE=['CRDB','NMB','TBL','TCC','TPCC','DCB','JHL','MKCB','SWIS','TOL','VODA','EABL'];
+const OLD_KEY='fedha-yangu-v1', ACC_KEY='fy-accounts', SESS_KEY='fy-session', REM_KEY='fy-remember';
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>(n<0?'-':'')+'TZS '+Math.round(Math.abs(n)).toLocaleString('en-US');
+const pct=x=>(x>=0?'+':'')+x.toFixed(1)+'%';
+const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36);
+const today=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+const shift=(ym,k)=>{const[y,m]=ym.split('-').map(Number);return new Date(Date.UTC(y,m-1+k,1)).toISOString().slice(0,7)};
+const mName=ym=>{const[y,m]=ym.split('-').map(Number);return new Date(Date.UTC(y,m-1,1)).toLocaleString('en',{month:'short',timeZone:'UTC'})};
+const tile=(l,v,c)=>`<div class="tile"><small>${esc(l)}</small><div class="num ${c}">${v}</div></div>`;
+const jget=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
+const jset=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}};
+
+let user=null, state=null, month=today().slice(0,7), mode='signin', INC={}, SPEND={};
+
+// ---------- accounts (local to this browser) ----------
+const accounts=()=>jget(ACC_KEY)||{};
+function randomSalt(){const a=new Uint8Array(16);crypto.getRandomValues(a);return [...a].map(b=>b.toString(16).padStart(2,'0')).join('')}
+async function hashPw(salt,pw){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(salt+':'+pw));return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('')}
+
+function setMode(m){
+  mode=m;
+  $('auth-title').textContent=m==='signin'?'Sign in':'Create account';
+  $('auth-submit').textContent=m==='signin'?'Sign in':'Create account';
+  $('pw2-wrap').hidden=m!=='create';
+  $('auth-toggle').textContent=m==='signin'?'New here? Create an account':'Have an account? Sign in';
+  $('auth-msg').textContent='';
+}
+
+// ---------- data per account ----------
+function seed(){
+  const ex=o=>Object.assign({id:uid(),example:true},o);
+  return {
+    entries:[
+      ex({type:'income',cat:'salary',amount:1800000,date:'2026-10-28',note:'Example salary'}),
+      ex({type:'income',cat:'salary',amount:1800000,date:'2026-11-01',note:'Example salary'}),
+      ex({type:'income',cat:'kilimo',amount:280000,date:'2026-10-12',note:'Example crop sale'}),
+      ex({type:'income',cat:'kilimo',amount:350000,date:'2026-11-03',note:'Example crop sale'}),
+      ex({type:'income',cat:'hisa',amount:60000,date:'2026-10-20',note:'Example dividend'}),
+      ex({type:'income',cat:'betting',amount:45000,date:'2026-10-09',note:'Example'}),
+      ex({type:'income',cat:'betting',amount:120000,date:'2026-11-04',note:'Example'}),
+      ex({type:'income',cat:'adam',amount:200000,date:'2026-10-15',note:'Example'}),
+      ex({type:'spend',cat:'home',amount:430000,date:'2026-10-02',note:'Example rent'}),
+      ex({type:'spend',cat:'home',amount:450000,date:'2026-11-02',note:'Example rent'}),
+      ex({type:'spend',cat:'baba',amount:200000,date:'2026-10-18',note:'Example'}),
+      ex({type:'spend',cat:'kukopesha',amount:150000,date:'2026-10-25',note:'Example loan'}),
+      ex({type:'spend',cat:'mama',amount:150000,date:'2026-11-05',note:'Example'}),
+      ex({type:'spend',cat:'mchumba',amount:100000,date:'2026-11-06',note:'Example'}),
+      ex({type:'spend',cat:'vocha',amount:30000,date:'2026-11-01',note:'Example'})
+    ],
+    holdings:[ex({ticker:'CRDB',shares:500,buyPrice:480,buyDate:'2026-09-15',history:[{date:'2026-09-15',price:480},{date:'2026-10-15',price:495},{date:'2026-11-06',price:510}]})],
+    budgets:{},customInc:[],customSpend:[]
+  };
+}
+function blankData(){return {entries:[],holdings:[],budgets:{},customInc:[],customSpend:[]}}
+function loadData(name,isNew){
+  const saved=jget('fy-data:'+name);
+  if(saved) return Object.assign(blankData(),saved);
+  if(isNew){
+    // Earlier versions saved data without accounts. Move that data into the first account.
+    const old=jget(OLD_KEY);
+    if(old){localStorage.removeItem(OLD_KEY);return Object.assign(blankData(),old)}
+    return seed();
+  }
+  return blankData();
+}
+function save(){if(user)jset('fy-data:'+user,state)}
+
+function refreshCats(){
+  INC={...BASE_INC}; state.customInc.forEach(c=>INC[c.key]=c.label);
+  SPEND={...BASE_SPEND}; state.customSpend.forEach(c=>SPEND[c.key]=c.label);
+}
+const lbl=(type,cat)=>((type==='income')?INC:SPEND)[cat]||'Removed category';
+
+// ---------- auth actions ----------
+$('auth-toggle').addEventListener('click',()=>setMode(mode==='signin'?'create':'signin'));
+
+$('f-auth').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const msg=t=>{$('auth-msg').textContent=t};
+  const name=$('un').value.trim().toLowerCase(), pw=$('pw').value;
+  if(!/^[a-z0-9_.-]{3,20}$/.test(name)){msg('Username: 3 to 20 letters, numbers, dots, dashes or underscores.');return}
+  if(pw.length<6){msg('Password must be at least 6 characters.');return}
+  if(!window.crypto||!crypto.subtle){msg('This browser cannot check passwords. Try another browser.');return}
+  const accs=accounts();
+  try{
+    if(mode==='create'){
+      if(accs[name]){msg('That username already exists on this browser.');return}
+      if(pw!==$('pw2').value){msg('Passwords do not match.');return}
+      const salt=randomSalt();
+      accs[name]={salt,hash:await hashPw(salt,pw)};
+      jset(ACC_KEY,accs);
+      startSession(name,true,$('remember').checked);
+    }else{
+      const a=accs[name];
+      if(!a||(await hashPw(a.salt,pw))!==a.hash){msg('Wrong username or password.');return}
+      startSession(name,false,$('remember').checked);
+    }
+  }catch(err){msg('Something went wrong. Please try again.')}
+});
+
+function startSession(name,isNew,remember){
+  user=name;
+  state=loadData(name,isNew);
+  refreshCats();
+  try{
+    sessionStorage.setItem(SESS_KEY,name);
+    if(remember) localStorage.setItem(REM_KEY,name); else localStorage.removeItem(REM_KEY);
+  }catch(e){}
+  $('f-auth').reset(); setMode('signin');
+  $('auth').hidden=true; $('app').hidden=false; $('who').textContent='Signed in as '+name;
+  enterApp();
+}
+
+function logOut(){
+  user=null; state=null;
+  try{sessionStorage.removeItem(SESS_KEY);localStorage.removeItem(REM_KEY)}catch(e){}
+  $('app').hidden=true; $('auth').hidden=false;
+  $('pw').value=''; $('pw2').value=''; $('auth-msg').textContent='';
+}
+$('logout').addEventListener('click',logOut);
+
+// ---------- calculations ----------
+const inMonth=ym=>state.entries.filter(e=>e.date.slice(0,7)===ym);
+const total=(list,type)=>list.filter(e=>e.type===type).reduce((a,e)=>a+e.amount,0);
+const byCat=(list,type)=>{const o={};list.filter(e=>e.type===type).forEach(e=>{o[e.cat]=(o[e.cat]||0)+e.amount});return o};
+
+function renderSummary(){
+  const m=inMonth(month), inc=total(m,'income'), out=total(m,'spend'), net=inc-out;
+  const inv=byCat(m,'income'), invTotal=['kilimo','hisa','betting'].reduce((a,k)=>a+(inv[k]||0),0);
+  $('sum').innerHTML=tile('Income',fmt(inc),'pos')+tile('Spending',fmt(out),'neg')+tile('Net',fmt(net),net>=0?'pos':'neg')+tile('Investment income',fmt(invTotal),'');
+}
+
+// Budgets are monthly limits per spending category. Spent is compared with the selected month.
+function renderBudget(){
+  const spent=byCat(inMonth(month),'spend');
+  const keys=Object.keys(SPEND).filter(k=>state.budgets[k]>0);
+  if(!keys.length){
+    $('budget-card').innerHTML='<h2>Budget</h2><p class="empty">No budgets yet. Set a monthly limit for each category on the Spending tab.</p>';
+    return;
+  }
+  const planned=keys.reduce((a,k)=>a+state.budgets[k],0);
+  const used=keys.reduce((a,k)=>a+(spent[k]||0),0);
+  const rows=keys.map(k=>{
+    const b=state.budgets[k], s=spent[k]||0, r=s/b*100, over=s>b, near=!over&&r>=80;
+    const cls=over?'neg':near?'warn':'';
+    const txtCls=over?'neg':near?'warn-t':'muted';
+    const status=over?`Over by ${fmt(s-b)}`:near?`${Math.round(r)}% used, close to limit`:`${fmt(b-s)} left`;
+    return `<div class="bar-row"><span>${esc(SPEND[k])}<small class="${txtCls}">${status}</small></span><div class="track"><div class="fill ${cls}" style="width:${Math.min(r,100).toFixed(1)}%"></div></div><span class="num">${fmt(s)} of ${fmt(b)}</span></div>`;
+  }).join('');
+  $('budget-card').innerHTML=`<h2>Budget</h2><p class="note" style="margin:0 0 4px">${fmt(used)} used of ${fmt(planned)} budgeted this month</p>`+rows;
+}
+
+function renderChart(){
+  const months=[5,4,3,2,1,0].map(k=>shift(month,k));
+  const inc=months.map(ym=>total(inMonth(ym),'income')), out=months.map(ym=>total(inMonth(ym),'spend'));
+  const W=640,H=240,pl=8,pt=12,pb=28,ph=H-pt-pb,max=Math.max(1,...inc,...out),band=(W-pl*2)/6,bw=band*0.32;
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Income and spending for the last six months">`;
+  s+=`<line class="grid" x1="0" x2="${W}" y1="${pt+ph}" y2="${pt+ph}"/>`;
+  months.forEach((ym,i)=>{
+    const x=pl+i*band+band*0.16, hi=inc[i]/max*ph, ho=out[i]/max*ph;
+    s+=`<rect class="bar-in" x="${x.toFixed(1)}" y="${(pt+ph-hi).toFixed(1)}" width="${bw.toFixed(1)}" height="${hi.toFixed(1)}" rx="3"><title>${mName(ym)} income: ${fmt(inc[i])}</title></rect>`;
+    s+=`<rect class="bar-out" x="${(x+bw+4).toFixed(1)}" y="${(pt+ph-ho).toFixed(1)}" width="${bw.toFixed(1)}" height="${ho.toFixed(1)}" rx="3"><title>${mName(ym)} spending: ${fmt(out[i])}</title></rect>`;
+    s+=`<text class="axis" x="${(pl+i*band+band/2).toFixed(1)}" y="${H-8}" text-anchor="middle">${mName(ym)}</text>`;
+  });
+  $('chart').innerHTML=s+'</svg>';
+}
+
+function bars(obj,labels,color){
+  const rows=Object.keys(labels).map(k=>[k,obj[k]||0]);
+  const max=Math.max(1,...rows.map(r=>r[1]));
+  return rows.map(([k,v])=>`<div class="bar-row"><span>${esc(labels[k])}</span><div class="track"><div class="fill ${color}" style="width:${(v/max*100).toFixed(1)}%"></div></div><span class="num">${fmt(v)}</span></div>`).join('');
+}
+
+function renderOverview(){
+  const m=inMonth(month);
+  $('out-bars').innerHTML=bars(byCat(m,'spend'),SPEND,'neg');
+  $('in-bars').innerHTML=bars(byCat(m,'income'),INC,'');
+}
+
+function entryHtml(e){
+  return `<div class="entry"><div class="meta"><b>${esc(lbl(e.type,e.cat))}</b><span>${esc(e.date)}${e.note?' · '+esc(e.note):''}</span></div><div class="right"><span class="num ${e.type==='income'?'pos':'neg'}">${fmt(e.amount)}</span><button class="ghost" data-act="del" data-id="${e.id}">Delete</button></div></div>`;
+}
+
+function renderFlow(type){
+  const m=inMonth(month).filter(e=>e.type===type).sort((a,b)=>b.date.localeCompare(a.date));
+  const labels=type==='income'?INC:SPEND, cats=byCat(m,type);
+  $(type==='income'?'inc-tiles':'sp-tiles').innerHTML=Object.keys(labels).map(k=>tile(labels[k],fmt(cats[k]||0),'')).join('');
+  $(type==='income'?'inc-list':'sp-list').innerHTML=m.length?m.map(entryHtml).join(''):'<p class="empty">No entries for this month yet.</p>';
+}
+
+function renderCatList(){
+  const items=[...state.customInc.map(c=>({...c,kind:'income',kindLabel:'Income source'})),...state.customSpend.map(c=>({...c,kind:'spend',kindLabel:'Spending category'}))];
+  $('cat-list').innerHTML=items.length?items.map(c=>`<div class="entry"><div class="meta"><b>${esc(c.label)}</b><span>${c.kindLabel}</span></div><button class="ghost" data-act="delcat" data-key="${c.key}" data-kind="${c.kind}">Remove</button></div>`).join(''):'<p class="empty">No custom categories yet.</p>';
+}
+
+// ---------- stocks ----------
+function chartSvg(h){
+  const pts=h.history.map(p=>p.price), all=[...pts,h.buyPrice];
+  const lo0=Math.min(...all), hi0=Math.max(...all), pad=(hi0-lo0)*0.2||hi0*0.05, lo=lo0-pad, hi=hi0+pad;
+  const W=600,H=170;
+  const x=i=>pts.length<2?W/2:20+i*(W-40)/(pts.length-1);
+  const y=v=>12+(hi-v)/(hi-lo)*(H-34);
+  const up=pts[pts.length-1]>=h.buyPrice, cls=up?'pos':'neg';
+  const line=pts.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(h.ticker)} price history against buy price">`;
+  s+=`<line class="grid" x1="0" x2="${W}" y1="${y(h.buyPrice).toFixed(1)}" y2="${y(h.buyPrice).toFixed(1)}" stroke-dasharray="4 4"/>`;
+  s+=`<text class="axis" x="4" y="${(y(h.buyPrice)-5).toFixed(1)}">Buy ${fmt(h.buyPrice)}</text>`;
+  if(pts.length>1) s+=`<polyline points="${line}" fill="none" stroke="currentColor" class="${cls}" stroke-width="2.5" stroke-linejoin="round"/>`;
+  pts.forEach((v,i)=>{s+=`<circle cx="${x(i).toFixed(1)}" cy="${y(v).toFixed(1)}" r="4" fill="currentColor" class="${cls}"><title>${esc(h.history[i].date)}: ${fmt(v)}</title></circle>`});
+  s+=`<text class="axis" x="${x(0).toFixed(1)}" y="${H-4}" text-anchor="${pts.length<2?'middle':'start'}">${esc(h.history[0].date)}</text>`;
+  if(pts.length>1) s+=`<text class="axis" x="${x(pts.length-1).toFixed(1)}" y="${H-4}" text-anchor="end">${esc(h.history[h.history.length-1].date)}</text>`;
+  return s+'</svg>';
+}
+
+function holdingHtml(h){
+  const cur=h.history[h.history.length-1].price, cost=h.shares*h.buyPrice, value=h.shares*cur, gain=value-cost, ch=(cur-h.buyPrice)/h.buyPrice*100;
+  const status=cur>h.buyPrice?['Growing','pos']:cur<h.buyPrice?['Losing','neg']:['Break-even',''];
+  return `<div class="hold">
+    <div class="hold-head"><b>${esc(h.ticker)} · ${Number(h.shares).toLocaleString('en-US')} shares</b><span class="badge ${status[1]}">${status[0]} ${pct(ch)}</span></div>
+    <div class="stats">
+      <div>Buy price<b>${fmt(h.buyPrice)}</b></div>
+      <div>Latest price<b>${fmt(cur)}</b></div>
+      <div>Cost<b>${fmt(cost)}</b></div>
+      <div>Value now<b>${fmt(value)}</b></div>
+      <div>Gain / loss<b class="${gain>=0?'pos':'neg'}">${gain>=0?'+':''}${fmt(gain)}</b></div>
+    </div>
+    ${chartSvg(h)}
+    <div class="logrow">
+      <input id="px-${h.id}" type="number" min="0.01" step="0.01" placeholder="New price (TZS)" aria-label="New price for ${esc(h.ticker)}">
+      <button class="ghost" data-act="log" data-id="${h.id}">Log price</button>
+      <button class="ghost" data-act="delh" data-id="${h.id}">Remove holding</button>
+    </div>
+    <p class="note">Gain is before brokerage fees and taxes. Bought ${esc(h.buyDate||'')}.</p>
+  </div>`;
+}
+
+function renderHoldings(){
+  $('holdings').innerHTML='<h2>Your holdings</h2>'+(state.holdings.length?state.holdings.map(holdingHtml).join(''):'<p class="empty">No holdings yet. Add a DSE share above and it will show here as Growing or Losing against your buy price.</p>');
+}
+
+// ---------- forms ----------
+function catOptions(type){
+  if(type==='income'){
+    return `<optgroup label="Investment">${['kilimo','hisa','betting'].map(k=>`<option value="${k}">${esc(INC[k])}</option>`).join('')}</optgroup>`
+      +`<optgroup label="Income">${['salary','adam',...state.customInc.map(c=>c.key)].map(k=>`<option value="${k}">${esc(INC[k])}</option>`).join('')}</optgroup>`;
+  }
+  return Object.keys(SPEND).map(k=>`<option value="${k}">${esc(SPEND[k])}</option>`).join('');
+}
+function fillAddCats(){$('add-cat').innerHTML=catOptions($('add-type').value)}
+
+function fillBudgetForm(){
+  const f=$('f-budget');
+  f.innerHTML=Object.keys(SPEND).map(k=>`<label>${esc(SPEND[k])}<input name="${k}" type="number" min="0" step="1" placeholder="No limit" value="${state.budgets[k]||''}"></label>`).join('')+`<button class="primary" type="submit">Save budgets</button>`;
+  f.onsubmit=e=>{
+    e.preventDefault();
+    Object.keys(SPEND).forEach(k=>{
+      const v=parseFloat(f.elements[k].value);
+      if(v>0) state.budgets[k]=Math.round(v); else delete state.budgets[k];
+    });
+    save(); $('bud-msg').textContent='Budgets saved.'; render();
+  };
+}
+
+// Called after a category is added or removed, so every form and list picks it up.
+function afterCatChange(){
+  refreshCats(); fillAddCats(); fillBudgetForm(); renderCatList(); render();
+}
+
+$('add-type').addEventListener('change',fillAddCats);
+
+$('f-add').addEventListener('submit',e=>{
+  e.preventDefault();
+  const amount=parseFloat($('add-amount').value), type=$('add-type').value;
+  if(!(amount>0)){$('add-msg').textContent='Enter an amount greater than zero.';return}
+  state.entries.push({id:uid(),type,cat:$('add-cat').value,amount:Math.round(amount),date:$('add-date').value||today(),note:$('add-note').value.trim()});
+  save();
+  $('add-amount').value=''; $('add-note').value='';
+  $('add-msg').textContent=(type==='income'?'Income':'Spending')+' saved.';
+  render();
+});
+
+$('f-cat').addEventListener('submit',e=>{
+  e.preventDefault();
+  const name=$('cat-name').value.trim(), kind=$('cat-kind').value;
+  if(!name){return}
+  const taken=[...Object.values(BASE_INC),...Object.values(BASE_SPEND),...state.customInc.map(c=>c.label),...state.customSpend.map(c=>c.label)];
+  if(taken.some(l=>l.toLowerCase()===name.toLowerCase())){$('cat-msg').textContent='That category already exists.';return}
+  (kind==='income'?state.customInc:state.customSpend).push({key:'c'+uid(),label:name});
+  save();
+  $('cat-name').value='';
+  $('cat-msg').textContent=(kind==='income'?'Income source':'Spending category')+' added.';
+  afterCatChange();
+});
+
+$('f-hold').addEventListener('submit',e=>{
+  e.preventDefault();
+  const f=e.target, ticker=f.ticker.value.trim().toUpperCase(), shares=parseFloat(f.shares.value), buy=parseFloat(f.buy.value), cur=parseFloat(f.current.value), buyDate=f.buyDate.value||today();
+  if(!ticker||!(shares>0)||!(buy>0)){$('hold-msg').textContent='Enter a ticker, the number of shares and the buy price.';return}
+  const history=[{date:buyDate,price:buy}];
+  if(cur>0) history.push({date:today(),price:cur});
+  state.holdings.push({id:uid(),ticker,shares,buyPrice:buy,buyDate,history});
+  save(); f.reset(); f.buyDate.value=today(); $('hold-msg').textContent='Holding added.'; render();
+});
+
+// ---------- dashboard menu (top left) ----------
+function toggleDash(force){
+  const open=typeof force==='boolean'?force:$('dash').hidden;
+  $('dash').hidden=!open;
+  $('dash-btn').setAttribute('aria-expanded',String(open));
+}
+$('dash-btn').addEventListener('click',e=>{e.stopPropagation();toggleDash()});
+document.addEventListener('click',e=>{
+  if(!$('dash').hidden&&!e.target.closest('#dash,#dash-btn')) toggleDash(false);
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape') toggleDash(false)});
+document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{
+  const go=b.dataset.go;
+  toggleDash(false);
+  if(go==='stocks'){showTab('stocks');return}
+  showTab('overview');
+  const target=go==='graphs'?$('graphs'):$('budget-card');
+  target.scrollIntoView({behavior:'smooth',block:'start'});
+}));
+
+// ---------- navigation and actions ----------
+function showTab(t){
+  document.querySelectorAll('nav button').forEach(x=>x.setAttribute('aria-selected',String(x.dataset.tab===t)));
+  document.querySelectorAll('section[id^="tab-"]').forEach(s=>{s.hidden=s.id!=='tab-'+t});
+}
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+
+$('month').addEventListener('change',e=>{if(e.target.value){month=e.target.value;render()}});
+
+// Two-tap confirm for deletes, since browsers block confirm() in this view.
+document.addEventListener('click',e=>{
+  const add=e.target.closest('[data-add]');
+  if(add){$('add-type').value=add.dataset.add;fillAddCats();showTab('add');$('add-amount').focus();return}
+  const t=e.target.closest('[data-act]'); if(!t) return;
+  const id=t.dataset.id, act=t.dataset.act;
+  if(act==='log'){
+    const v=parseFloat($('px-'+id).value); if(!(v>0)) return;
+    const h=state.holdings.find(x=>x.id===id); if(!h) return;
+    const d=today(), last=h.history[h.history.length-1];
+    if(last.date===d) last.price=v; else h.history.push({date:d,price:v});
+    save(); render(); return;
+  }
+  if(act==='del'||act==='delh'||act==='delcat'){
+    if(!t.dataset.armed){t.dataset.armed='1';t.textContent='Tap again to confirm';return}
+    if(act==='del') state.entries=state.entries.filter(x=>x.id!==id);
+    else if(act==='delh') state.holdings=state.holdings.filter(x=>x.id!==id);
+    else{
+      const key=t.dataset.key;
+      if(t.dataset.kind==='income') state.customInc=state.customInc.filter(c=>c.key!==key);
+      else state.customSpend=state.customSpend.filter(c=>c.key!==key);
+      delete state.budgets[key];
+      save(); afterCatChange(); return;
+    }
+    save(); render();
+  }
+});
+
+$('clear-ex').addEventListener('click',()=>{
+  state.entries=state.entries.filter(e=>!e.example);
+  state.holdings=state.holdings.filter(h=>!h.example);
+  save(); render();
+});
+
+// ---------- profile picture (stored per account in this browser) ----------
+const avKey=()=>'fy-avatar:'+user;
+function getAvatar(){try{return localStorage.getItem(avKey())}catch(e){return null}}
+function setAvatar(v){try{if(v)localStorage.setItem(avKey(),v);else localStorage.removeItem(avKey());return true}catch(e){return false}}
+
+function renderAvatar(){
+  const url=getAvatar(), initial=(user||'?').charAt(0).toUpperCase();
+  ['av-big','av-small'].forEach(id=>{
+    const el=$(id); el.textContent=url?'':initial; el.style.backgroundImage=url?`url("${url}")`:'';
+  });
+  $('pname').textContent=user||'';
+  $('av-remove').hidden=!url;
+}
+
+$('av-file').addEventListener('change',e=>{
+  const msg=t=>{$('av-msg').textContent=t};
+  const file=e.target.files[0];
+  e.target.value='';
+  if(!file) return;
+  if(!file.type.startsWith('image/')){msg('Choose an image file (JPG, PNG or WebP).');return}
+  if(file.size>15e6){msg('That picture is too large. Choose one under 15 MB.');return}
+  const reader=new FileReader();
+  reader.onerror=()=>msg('That file could not be read.');
+  reader.onload=()=>{
+    const img=new Image();
+    img.onerror=()=>msg('That file could not be read as a picture.');
+    img.onload=()=>{
+      const S=256, side=Math.min(img.width,img.height);
+      const sx=(img.width-side)/2, sy=(img.height-side)/2;
+      const c=document.createElement('canvas');
+      c.width=S; c.height=S;
+      c.getContext('2d').drawImage(img,sx,sy,side,side,0,0,S,S);
+      if(setAvatar(c.toDataURL('image/jpeg',0.85))){msg('Picture saved.');renderAvatar()}
+      else msg('Could not save the picture. Browser storage may be full.');
+    };
+    img.src=reader.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+$('av-remove').addEventListener('click',()=>{
+  setAvatar(null); $('av-msg').textContent='Picture removed.'; renderAvatar();
+});
+
+// ---------- import from bank messages or statement lines ----------
+// The page cannot reach a bank directly, so it reads text you paste or load from a statement file.
+let importRows=[];
+const IN_RE=/(received|credited|credit|deposit|imepokea|umepokea|salary|incoming)/;
+const OUT_RE=/(sent|paid|withdr|debit|umetuma|imetolewa|purchase|payment|bought|airtime|lipa|transfer to)/;
+
+function parseLine(line){
+  const raw=line.trim().replace(/\s+/g,' ');
+  if(!raw) return null;
+  let date=today();
+  const iso=raw.match(/\b(\d{4})-(\d{2})-(\d{2})\b/), dmy=raw.match(/\b(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4}|\d{2})\b/);
+  if(iso) date=`${iso[1]}-${iso[2]}-${iso[3]}`;
+  else if(dmy){const y=dmy[3].length===2?'20'+dmy[3]:dmy[3]; date=`${y}-${dmy[2].padStart(2,'0')}-${dmy[1].padStart(2,'0')}`}
+  const rest=raw.replace(/\b\d{4}-\d{2}-\d{2}\b/g,' ').replace(/\b\d{1,2}[\/.-]\d{1,2}[\/.-](\d{4}|\d{2})\b/g,' ');
+  let amount=null;
+  // Prefer a TZS amount that is not the account balance.
+  for(const m of rest.matchAll(/(?:TZS|TSh|Tsh|TSHS|Tshs)\.?\s*(\d[\d,]*(?:\.\d+)?)/gi)){
+    if(/balance|salio|bal\b/i.test(rest.slice(Math.max(0,m.index-25),m.index))) continue;
+    amount=parseFloat(m[1].replace(/,/g,'')); break;
+  }
+  if(amount==null){
+    const nums=[...rest.matchAll(/\d[\d,]*(?:\.\d+)?/g)].map(m=>parseFloat(m[0].replace(/,/g,''))).filter(n=>n>=100);
+    if(nums.length) amount=Math.max(...nums);
+  }
+  if(!(amount>0)) return null;
+  const low=raw.toLowerCase(), isIn=IN_RE.test(low), isOut=OUT_RE.test(low);
+  return {line:raw.slice(0,160),date,amount:Math.round(amount),type:isIn&&!isOut?'income':'spend',unsure:isIn===isOut,cat:'',key:date+'|'+Math.round(amount)+'|'+low.slice(0,120)};
+}
+
+function renderImport(){
+  const box=$('imp-preview');
+  if(!importRows.length){box.innerHTML='';$('imp-actions').hidden=true;return}
+  const seen=new Set(state.importKeys||[]);
+  box.innerHTML=importRows.map((r,i)=>{
+    const dup=seen.has(r.key);
+    const typeSel=`<select data-imp="${i}" data-field="type" aria-label="Money in or out"><option value="income" ${r.type==='income'?'selected':''}>In</option><option value="spend" ${r.type==='spend'?'selected':''}>Out</option></select>`;
+    const opts=`<option value="">Choose category</option>`+catOptions(r.type);
+    const catSel=`<select data-imp="${i}" data-field="cat" aria-label="Category">${r.cat?opts.replace(`value="${r.cat}"`,`value="${r.cat}" selected`):opts}</select>`;
+    return `<div class="entry"><div class="meta"><b class="num ${r.type==='income'?'pos':'neg'}">${fmt(r.amount)}</b><span>${esc(r.date)} · ${esc(r.line)}</span>${r.unsure?'<span class="warn-t">Check whether this was money in or out</span>':''}${dup?'<span class="muted">Already added, will be skipped</span>':''}</div><div class="right">${typeSel}${catSel}</div></div>`;
+  }).join('');
+  $('imp-actions').hidden=false;
+}
+
+$('imp-preview').addEventListener('change',e=>{
+  const r=importRows[+e.target.dataset.imp];
+  if(!r) return;
+  if(e.target.dataset.field==='type'){r.type=e.target.value;r.cat='';r.unsure=false;renderImport()}
+  else if(e.target.dataset.field==='cat'){r.cat=e.target.value}
+});
+
+$('f-import').addEventListener('submit',e=>{
+  e.preventDefault();
+  importRows=$('imp-text').value.split(/\r?\n/).map(parseLine).filter(Boolean);
+  if(!importRows.length){
+    $('imp-msg').textContent='No amounts found. Paste the full message or a statement line that includes the amount.';
+  }else{
+    $('imp-msg').textContent=`Found ${importRows.length} entries. Choose a category for each, then add them.`;
+  }
+  renderImport();
+});
+
+$('imp-file').addEventListener('change',e=>{
+  const f=e.target.files[0];
+  e.target.value='';
+  if(!f) return;
+  if(f.size>2e6){$('imp-msg').textContent='That file is too large. Choose a statement under 2 MB.';return}
+  const r=new FileReader();
+  r.onerror=()=>{$('imp-msg').textContent='That file could not be read.'};
+  r.onload=()=>{$('imp-text').value=String(r.result||'');$('imp-msg').textContent='File loaded. Press Read entries.'};
+  r.readAsText(f);
+});
+
+$('imp-save').addEventListener('click',()=>{
+  state.importKeys=state.importKeys||[];
+  const seen=new Set(state.importKeys);
+  let added=0, dup=0;
+  importRows.forEach(r=>{
+    if(seen.has(r.key)){dup++;return}
+    if(!r.cat) return;
+    state.entries.push({id:uid(),type:r.type,cat:r.cat,amount:r.amount,date:r.date,note:r.line.slice(0,80)});
+    seen.add(r.key); state.importKeys.push(r.key); added++;
+  });
+  state.importKeys=state.importKeys.slice(-1000);
+  importRows=importRows.filter(r=>!r.cat);
+  save();
+  const left=importRows.length;
+  $('imp-msg').textContent=`Added ${added}. ${dup} already added before. ${left} still need a category.`;
+  render(); renderImport();
+});
+
+$('imp-clear').addEventListener('click',()=>{
+  importRows=[]; $('imp-text').value=''; $('imp-msg').textContent=''; renderImport();
+});
+
+// ---------- backup, download and restore ----------
+const csvCell=v=>{const s=String(v==null?'':v);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
+
+// Downloads go through the viewer's own confirmation. Where downloads are not available, say so.
+async function offerDownload(filename,data){
+  const msg=t=>{$('dl-msg').textContent=t};
+  let dl=null;
+  try{dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null}catch(e){dl=null}
+  if(!dl){
+    // Outside Claude (for example on GitHub Pages), save the file directly in the browser.
+    try{
+      const blob=data instanceof Blob?data:new Blob([data],{type:filename.endsWith('.csv')?'text/csv;charset=utf-8':'application/json;charset=utf-8'});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');
+      a.href=url; a.download=filename;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+      msg('Download started.');
+    }catch(err){msg('This browser could not start the download.')}
+    return;
+  }
+  try{
+    await dl.save({filename,data});
+    msg('Download started.');
+  }catch(err){
+    const c=err&&err.code;
+    msg(c==='declined'?'Download cancelled.':c==='too_large'?'That file is too large to download.':c==='rate_limited'?'Wait a moment, then try again.':'Downloads are not available in this view.');
+  }
+}
+
+$('dl-backup').addEventListener('click',()=>{
+  const data=JSON.stringify({app:'fedha-yangu',version:1,exported:new Date().toISOString(),data:state},null,2);
+  offerDownload(`fedha-yangu-backup-${today()}.json`,data);
+});
+
+$('dl-csv').addEventListener('click',()=>{
+  const rows=[['type','category','amount','date','note'].join(',')];
+  [...state.entries].sort((a,b)=>a.date.localeCompare(b.date)).forEach(e=>{
+    rows.push([e.type==='income'?'income':'spending',lbl(e.type,e.cat),e.amount,e.date,e.note||''].map(csvCell).join(','));
+  });
+  offerDownload(`fedha-yangu-entries-${today()}.csv`,'﻿'+rows.join('\r\n'));
+});
+
+// Restore only adds what is missing. Nothing you already have is removed or overwritten.
+$('bk-file').addEventListener('change',e=>{
+  const f=e.target.files[0];
+  e.target.value='';
+  if(!f) return;
+  const msg=t=>{$('dl-msg').textContent=t};
+  if(f.size>20e6){msg('That backup is too large.');return}
+  const r=new FileReader();
+  r.onerror=()=>msg('That file could not be read.');
+  r.onload=()=>{
+    let obj=null;
+    try{obj=JSON.parse(String(r.result))}catch(err){obj=null}
+    const d=obj&&obj.app==='fedha-yangu'&&obj.data;
+    if(!d||!Array.isArray(d.entries)){msg('That file is not a Fedha Yangu backup.');return}
+    const ids=new Set(state.entries.map(x=>x.id));
+    let added=0;
+    d.entries.forEach(x=>{if(x&&x.id&&!ids.has(x.id)&&x.type&&x.amount>0){state.entries.push(x);ids.add(x.id);added++}});
+    const hids=new Set(state.holdings.map(h=>h.id));
+    (Array.isArray(d.holdings)?d.holdings:[]).forEach(h=>{if(h&&h.id&&!hids.has(h.id)){state.holdings.push(h);hids.add(h.id)}});
+    Object.assign(state.budgets,d.budgets||{});
+    ['customInc','customSpend'].forEach(k=>(Array.isArray(d[k])?d[k]:[]).forEach(c=>{if(c&&c.key&&!state[k].some(x=>x.key===c.key))state[k].push(c)}));
+    state.importKeys=[...new Set([...(state.importKeys||[]),...(Array.isArray(d.importKeys)?d.importKeys:[])])].slice(-1000);
+    save(); afterCatChange();
+    msg(`Restored ${added} entries. Existing records were kept.`);
+  };
+  r.readAsText(f);
+});
+
+// ---------- render ----------
+function render(){
+  $('month').value=month;
+  renderSummary(); renderBudget(); renderChart(); renderOverview();
+  renderFlow('income'); renderFlow('spend'); renderHoldings(); renderCatList(); renderAvatar();
+  $('clear-ex').hidden=!(state.entries.some(e=>e.example)||state.holdings.some(h=>h.example));
+}
+
+function enterApp(){
+  state.importKeys=state.importKeys||[];
+  importRows=[]; renderImport(); $('dash').hidden=true;
+  $('add-date').value=today();
+  $('f-hold').buyDate.value=today();
+  $('add-msg').textContent=''; $('cat-msg').textContent=''; $('bud-msg').textContent='';
+  refreshCats();
+  fillAddCats();
+  fillBudgetForm();
+  $('dse').innerHTML=DSE.map(t=>`<option value="${t}">`).join('');
+  month=today().slice(0,7);
+  showTab('overview');
+  render();
+}
+
+// Restore the signed-in session for this tab, if there is one.
+(function restore(){
+  let s=null;
+  let remembered=null;
+  try{s=sessionStorage.getItem(SESS_KEY);remembered=localStorage.getItem(REM_KEY)}catch(e){}
+  if(!s) s=remembered;
+  if(s&&accounts()[s]) startSession(s,false,remembered===s);
+  else setMode('signin');
+})();
+</script>
